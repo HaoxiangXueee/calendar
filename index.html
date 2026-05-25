@@ -1,5 +1,6 @@
 <!doctype html>
-<html lang="zh-CN"><head>
+<html lang="zh-CN">
+  <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="data:,">
@@ -635,86 +636,14 @@
             <h2>类型筛选</h2>
             <button class="ghost-button" id="showAllTypes" type="button">全选</button>
           </div>
-          <div class="type-filter-list" id="typeFilters"><button type="button" class="type-filter" style="--type-color: #2563eb;">
-            <span class="swatch"></span>
-            <strong>金山上班</strong>
-            <span class="type-count">13</span>
-          </button><button type="button" class="type-filter" style="--type-color: #f59e0b;">
-            <span class="swatch"></span>
-            <strong>学车</strong>
-            <span class="type-count">12</span>
-          </button><button type="button" class="type-filter" style="--type-color: #16a34a;">
-            <span class="swatch"></span>
-            <strong>健身</strong>
-            <span class="type-count">5</span>
-          </button><button type="button" class="type-filter" style="--type-color: #db2777;">
-            <span class="swatch"></span>
-            <strong>年假</strong>
-            <span class="type-count">12</span>
-          </button><button type="button" class="type-filter" style="--type-color: #7c3aed;">
-            <span class="swatch"></span>
-            <strong>端午</strong>
-            <span class="type-count">3</span>
-          </button><button type="button" class="type-filter" style="--type-color: #40ed62;">
-            <span class="swatch"></span>
-            <strong>健康美丽</strong>
-            <span class="type-count">6</span>
-          </button><button type="button" class="type-filter" style="--type-color: #40ede2;">
-            <span class="swatch"></span>
-            <strong>旅游</strong>
-            <span class="type-count">5</span>
-          </button><button type="button" class="type-filter" style="--type-color: #0a0000;">
-            <span class="swatch"></span>
-            <strong>字节上班</strong>
-            <span class="type-count">5</span>
-          </button></div>
+          <div class="type-filter-list" id="typeFilters"></div>
         </section>
 
         <section class="panel">
           <div class="panel-heading">
             <h2>类型编辑</h2>
           </div>
-          <div class="type-editor-list" id="typeEditors"><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #2563eb" aria-label="金山上班 颜色"></button>
-            <input type="text" value="金山上班" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 金山上班">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #f59e0b" aria-label="学车 颜色"></button>
-            <input type="text" value="学车" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 学车">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #16a34a" aria-label="健身 颜色"></button>
-            <input type="text" value="健身" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 健身">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #db2777" aria-label="年假 颜色"></button>
-            <input type="text" value="年假" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 年假">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #7c3aed" aria-label="端午 颜色"></button>
-            <input type="text" value="端午" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 端午">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #40ed62" aria-label="健康美丽 颜色"></button>
-            <input type="text" value="健康美丽" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 健康美丽">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #40ede2" aria-label="旅游 颜色"></button>
-            <input type="text" value="旅游" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 旅游">删除</button>
-            
-          </div><div class="type-editor-row">
-            <button class="color-trigger" type="button" style="--type-color: #0a0000" aria-label="字节上班 颜色"></button>
-            <input type="text" value="字节上班" aria-label="类型名称">
-            <button class="type-delete-button" type="button" aria-label="删除 字节上班">删除</button>
-            
-          </div></div>
+          <div class="type-editor-list" id="typeEditors"></div>
           <button class="secondary-button full-width" id="addType" type="button">新增类型</button>
         </section>
       </aside>
@@ -723,7 +652,7 @@
         <header class="topbar">
           <div>
             <p class="eyebrow">Date Span</p>
-            <h2 id="rangeTitle">2026-05-25 至 2026-06-28</h2>
+            <h2 id="rangeTitle">2026-05-25 至 2026-07-05</h2>
           </div>
           <div class="date-controls" aria-label="选择展示日期范围">
             <label>
@@ -741,15 +670,15 @@
 
         <section class="summary-strip" aria-label="当前日历统计">
           <div>
-            <span id="visibleDayCount">35</span>
+            <span id="visibleDayCount">0</span>
             <small>展示天数</small>
           </div>
           <div>
-            <span id="eventCount">61</span>
+            <span id="eventCount">0</span>
             <small>日程数量</small>
           </div>
           <div>
-            <span id="activeTypeCount">8</span>
+            <span id="activeTypeCount">0</span>
             <small>显示类型</small>
           </div>
         </section>
@@ -764,190 +693,7 @@
             <span>周六</span>
             <span>周日</span>
           </div>
-          <div class="calendar-grid" id="calendarGrid"><button type="button" class="day-cell today" data-date="2026-05-25" aria-label="2026-05-25 日程"><div class="day-head"><span class="day-number">25</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #0a0000;">
-          <strong>填背调</strong>
-          <small>15:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-05-26" aria-label="2026-05-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-05-27" aria-label="2026-05-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二1</strong>
-          <small>12:00-17:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-05-28" aria-label="2026-05-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #16a34a;">
-          <strong>健身</strong>
-          <small>待定</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-05-29" aria-label="2026-05-29 日程"><div class="day-head"><span class="day-number">29</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二-2</strong>
-          <small>13:00-17:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>做脸</strong>
-          <small>19:00-21:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-05-30" aria-label="2026-05-30 日程"><div class="day-head"><span class="day-number">30</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-05-31" aria-label="2026-05-31 日程"><div class="day-head"><span class="day-number">31</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>看牙</strong>
-          <small>09:00-14:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-01" aria-label="2026-06-01 日程"><div class="day-head"><span class="day-number">1</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二-3</strong>
-          <small>12:00-17:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #16a34a;">
-          <strong>健身</strong>
-          <small>待定</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-02" aria-label="2026-06-02 日程"><div class="day-head"><span class="day-number">2</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-03" aria-label="2026-06-03 日程"><div class="day-head"><span class="day-number">3</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二-4</strong>
-          <small>12:00-17:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-04" aria-label="2026-06-04 日程"><div class="day-head"><span class="day-number">4</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二-5+报考试</strong>
-          <small>12:00-17:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #0a0000;">
-          <strong>线下工作沟通</strong>
-          <small>20:00-21:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-05" aria-label="2026-06-05 日程"><div class="day-head"><span class="day-number">5</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>看甲状腺</strong>
-          <small>10:00-15:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科二-6</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-06" aria-label="2026-06-06 日程"><div class="day-head"><span class="day-number">6</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>科目二考试</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-07" aria-label="2026-06-07 日程"><div class="day-head"><span class="day-number">7</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-08" aria-label="2026-06-08 日程"><div class="day-head"><span class="day-number">8</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>看牙</strong>
-          <small>09:00-14:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-09" aria-label="2026-06-09 日程"><div class="day-head"><span class="day-number">9</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #16a34a;">
-          <strong>健身</strong>
-          <small>待定</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-10" aria-label="2026-06-10 日程"><div class="day-head"><span class="day-number">10</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #16a34a;">
-          <strong>健身</strong>
-          <small>待定</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-11" aria-label="2026-06-11 日程"><div class="day-head"><span class="day-number">11</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>看中医</strong>
-          <small>09:00-14:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ed62;">
-          <strong>烫头</strong>
-          <small>17:00-20:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-12" aria-label="2026-06-12 日程"><div class="day-head"><span class="day-number">12</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>上班</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>13:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #16a34a;">
-          <strong>健身</strong>
-          <small>待定</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-13" aria-label="2026-06-13 日程"><div class="day-head"><span class="day-number">13</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-14" aria-label="2026-06-14 日程"><div class="day-head"><span class="day-number">14</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科三1</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-15" aria-label="2026-06-15 日程"><div class="day-head"><span class="day-number">15</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科三2</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-16" aria-label="2026-06-16 日程"><div class="day-head"><span class="day-number">16</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-17" aria-label="2026-06-17 日程"><div class="day-head"><span class="day-number">17</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #2563eb;">
-          <strong>lastday（实际不去）</strong>
-          <small>09:00-12:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ede2;">
-          <strong>马尔代夫</strong>
-          <small>09:00-20:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #db2777;">
-          <strong>年假</strong>
-          <small>10:00-18:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-18" aria-label="2026-06-18 日程"><div class="day-head"><span class="day-number">18</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #40ede2;">
-          <strong>马尔代夫</strong>
-          <small>09:00-20:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>科三考试报名</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-19" aria-label="2026-06-19 日程"><div class="day-head"><span class="day-number">19</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #7c3aed;">
-          <strong>端午节</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ede2;">
-          <strong>马尔代夫</strong>
-          <small>09:00-20:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-20" aria-label="2026-06-20 日程"><div class="day-head"><span class="day-number">20</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #7c3aed;">
-          <strong>端午节</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ede2;">
-          <strong>马尔代夫</strong>
-          <small>09:00-20:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-21" aria-label="2026-06-21 日程"><div class="day-head"><span class="day-number">21</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #7c3aed;">
-          <strong>端午节</strong>
-          <small>09:00-18:00</small>
-        </button><button type="button" class="event-chip" draggable="true" style="--event-color: #40ede2;">
-          <strong>马尔代夫</strong>
-          <small>09:00-20:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-22" aria-label="2026-06-22 日程"><div class="day-head"><span class="day-number">22</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>学车-科三3</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-23" aria-label="2026-06-23 日程"><div class="day-head"><span class="day-number">23</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #f59e0b;">
-          <strong>科目三考试</strong>
-          <small>12:00-17:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-24" aria-label="2026-06-24 日程"><div class="day-head"><span class="day-number">24</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #0a0000;">
-          <strong>字节入职</strong>
-          <small>10:00-22:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-25" aria-label="2026-06-25 日程"><div class="day-head"><span class="day-number">25</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #0a0000;">
-          <strong>字节上班</strong>
-          <small>10:00-22:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-26" aria-label="2026-06-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" draggable="true" style="--event-color: #0a0000;">
-          <strong>字节上班</strong>
-          <small>10:00-22:00</small>
-        </button></div></button><button type="button" class="day-cell" data-date="2026-06-27" aria-label="2026-06-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-28" aria-label="2026-06-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">6月</span></div><div class="event-list"></div></button></div>
+          <div class="calendar-grid" id="calendarGrid"></div>
         </section>
       </section>
 
@@ -957,10 +703,10 @@
           <button class="ghost-button" id="resetEventForm" type="button">清空</button>
         </div>
         <form id="eventForm" class="event-form">
-          <input id="eventId" type="hidden" value="">
+          <input id="eventId" type="hidden">
           <label>
             日期
-            <input id="eventDate" type="date" required="">
+            <input id="eventDate" type="date" required>
           </label>
           <label>
             时间
@@ -968,11 +714,11 @@
           </label>
           <label>
             标题
-            <input id="eventTitle" type="text" placeholder="例如 上班" required="">
+            <input id="eventTitle" type="text" placeholder="例如 上班" required>
           </label>
           <label>
             类型
-            <select id="eventType" required=""><option value="work">金山上班</option><option value="driving">学车</option><option value="fitness">健身</option><option value="dinner">年假</option><option value="type-mpkli0qn-e8ssxf">端午</option><option value="type-mpkll5rp-mc2kxi">健康美丽</option><option value="type-mpklomqq-qzxc0l">旅游</option><option value="type-mpklovk0-3h4hmz">字节上班</option></select>
+            <select id="eventType" required></select>
           </label>
           <label>
             地点
@@ -984,14 +730,14 @@
           </label>
           <div class="form-actions">
             <button class="primary-button" type="submit">保存日程</button>
-            <button class="danger-button" id="deleteEvent" type="button" disabled="">删除</button>
+            <button class="danger-button" id="deleteEvent" type="button">删除</button>
           </div>
-          <div class="copy-box is-disabled" id="copyBox">
+          <div class="copy-box" id="copyBox">
             <label>
               复制到日期
               <input id="copyDate" type="date">
             </label>
-            <button class="secondary-button full-width" id="copyEvent" type="button" disabled="">复制当前日程</button>
+            <button class="secondary-button full-width" id="copyEvent" type="button">复制当前日程</button>
           </div>
         </form>
       </aside>
@@ -1733,6 +1479,5 @@
       render();
 
     </script>
-  
-
-</body></html>
+  </body>
+</html>
