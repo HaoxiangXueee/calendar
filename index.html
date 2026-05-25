@@ -1,0 +1,1617 @@
+<!doctype html>
+<html lang="zh-CN"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:,">
+    <title>离线月历</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #e8ecef;
+        --paper: #faf9f5;
+        --paper-soft: #f4f2ed;
+        --surface: rgba(255, 255, 252, 0.82);
+        --surface-strong: #fffefa;
+        --ink: #202124;
+        --ink-soft: #3f4449;
+        --muted: #737b84;
+        --line: rgba(39, 49, 58, 0.14);
+        --line-strong: rgba(39, 49, 58, 0.24);
+        --accent: #0f766e;
+        --accent-dark: #0d5f5a;
+        --accent-soft: rgba(15, 118, 110, 0.12);
+        --danger: #b42318;
+        --danger-soft: #fff1ef;
+        --shadow-sm: 0 1px 2px rgba(30, 41, 59, 0.08);
+        --shadow-md: 0 14px 40px rgba(30, 41, 59, 0.13);
+        --shadow-lg: 0 26px 70px rgba(30, 41, 59, 0.18);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-width: 1180px;
+        min-height: 100vh;
+        background:
+          linear-gradient(135deg, rgba(15, 118, 110, 0.1) 0%, rgba(255, 255, 255, 0) 34%),
+          linear-gradient(180deg, #fbfbf8 0%, var(--bg) 100%);
+        color: var(--ink);
+        font-family: Inter, "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.45;
+      }
+
+      .app-shell {
+        display: grid;
+        grid-template-columns: 278px minmax(720px, 1fr) 332px;
+        gap: 18px;
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .sidebar,
+      .workspace,
+      .editor-panel {
+        min-height: calc(100vh - 40px);
+      }
+
+      .sidebar,
+      .editor-panel,
+      .topbar,
+      .summary-strip div,
+      .calendar-area {
+        backdrop-filter: blur(18px);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-md);
+      }
+
+      .sidebar,
+      .editor-panel {
+        padding: 18px;
+      }
+
+      .sidebar {
+        border-radius: 18px 8px 8px 18px;
+      }
+
+      .editor-panel {
+        position: sticky;
+        top: 20px;
+        align-self: start;
+        border-radius: 8px 18px 18px 8px;
+      }
+
+      .workspace {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+
+      .brand-block {
+        padding: 6px 2px 18px;
+        border-bottom: 1px solid var(--line);
+        margin-bottom: 18px;
+      }
+
+      .brand-block h1,
+      .topbar h2,
+      .panel h2,
+      .editor-panel h2 {
+        margin: 0;
+        letter-spacing: 0;
+      }
+
+      .brand-block h1 {
+        font-size: 44px;
+        line-height: 0.95;
+        font-weight: 900;
+      }
+
+      .topbar h2 {
+        font-size: 27px;
+        line-height: 1.12;
+        font-weight: 900;
+        white-space: nowrap;
+      }
+
+      .panel h2,
+      .editor-panel h2 {
+        font-size: 15px;
+        font-weight: 900;
+      }
+
+      .eyebrow {
+        margin: 0 0 8px;
+        color: var(--accent-dark);
+        font-size: 11px;
+        font-weight: 900;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .muted {
+        color: var(--muted);
+        line-height: 1.55;
+        margin: 10px 0 0;
+      }
+
+      .panel {
+        border-top: 1px solid var(--line);
+        padding-top: 16px;
+        margin-top: 16px;
+      }
+
+      .panel-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        min-height: 94px;
+        border-radius: 8px;
+        padding: 18px 20px;
+      }
+
+      .date-controls {
+        display: flex;
+        align-items: end;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      label {
+        display: grid;
+        gap: 7px;
+        color: var(--ink-soft);
+        font-size: 12px;
+        font-weight: 800;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.88);
+        color: var(--ink);
+        padding: 9px 10px;
+        outline: none;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+        transition: border-color 140ms ease, box-shadow 140ms ease, background 140ms ease;
+      }
+
+      textarea {
+        resize: vertical;
+      }
+
+      input:hover,
+      select:hover,
+      textarea:hover {
+        background: #ffffff;
+      }
+
+      input:focus,
+      select:focus,
+      textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-soft);
+      }
+
+      .primary-button,
+      .secondary-button,
+      .ghost-button,
+      .danger-button {
+        min-height: 40px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        padding: 0 13px;
+        font-weight: 900;
+        white-space: nowrap;
+        transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, border-color 140ms ease;
+      }
+
+      .primary-button {
+        background: var(--accent);
+        color: #ffffff;
+        box-shadow: 0 10px 22px rgba(15, 118, 110, 0.22);
+      }
+
+      .primary-button:hover {
+        background: var(--accent-dark);
+        transform: translateY(-1px);
+      }
+
+      .secondary-button {
+        background: rgba(255, 255, 255, 0.72);
+        border-color: var(--line-strong);
+        color: var(--ink);
+      }
+
+      .secondary-button:hover {
+        background: #ffffff;
+        border-color: rgba(15, 118, 110, 0.38);
+      }
+
+      .ghost-button {
+        min-height: 32px;
+        background: transparent;
+        color: var(--accent-dark);
+        padding: 0 8px;
+      }
+
+      .ghost-button:hover {
+        background: var(--accent-soft);
+      }
+
+      .danger-button {
+        background: var(--danger-soft);
+        border-color: rgba(180, 35, 24, 0.18);
+        color: var(--danger);
+      }
+
+      .danger-button:hover:not(:disabled) {
+        border-color: rgba(180, 35, 24, 0.36);
+      }
+
+      .full-width {
+        width: 100%;
+      }
+
+      .summary-strip {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+      }
+
+      .summary-strip div {
+        border-radius: 8px;
+        padding: 13px 16px;
+      }
+
+      .summary-strip span {
+        display: block;
+        font-size: 25px;
+        font-weight: 950;
+      }
+
+      .summary-strip small {
+        color: var(--muted);
+        font-weight: 800;
+      }
+
+      .calendar-area {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        border-radius: 8px;
+        overflow: hidden;
+      }
+
+      .weekday-row,
+      .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(92px, 1fr));
+      }
+
+      .weekday-row {
+        border-bottom: 1px solid var(--line);
+        background: rgba(244, 242, 237, 0.86);
+      }
+
+      .weekday-row span {
+        padding: 11px 12px;
+        color: var(--ink-soft);
+        font-size: 12px;
+        font-weight: 950;
+        text-align: center;
+      }
+
+      .calendar-grid {
+        flex: 1;
+        auto-rows: minmax(122px, 1fr);
+      }
+
+      .day-cell {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 122px;
+        border: 0;
+        border-right: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        padding: 9px;
+        background: rgba(255, 255, 252, 0.72);
+        text-align: left;
+        transition: background 140ms ease, transform 140ms ease, box-shadow 140ms ease;
+      }
+
+      .day-cell:nth-child(7n) {
+        border-right: none;
+      }
+
+      .day-cell:hover {
+        background: #ffffff;
+        box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.18);
+      }
+
+      .day-cell.outside-range {
+        background: rgba(229, 232, 235, 0.62);
+        color: #8b95a1;
+      }
+
+      .day-cell.today {
+        box-shadow: inset 0 0 0 2px var(--accent);
+      }
+
+      .day-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 6px;
+        min-height: 22px;
+      }
+
+      .day-number {
+        font-size: 15px;
+        font-weight: 950;
+      }
+
+      .month-tag {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 900;
+      }
+
+      .event-list {
+        display: grid;
+        gap: 6px;
+        align-content: start;
+      }
+
+      .event-chip {
+        display: grid;
+        gap: 2px;
+        width: 100%;
+        border: 1px solid rgba(17, 24, 39, 0.08);
+        border-left: 5px solid var(--event-color);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--event-color) 12%, #ffffff);
+        color: #111827;
+        padding: 6px 7px;
+        text-align: left;
+        box-shadow: var(--shadow-sm);
+        transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease;
+      }
+
+      .event-chip:hover {
+        background: color-mix(in srgb, var(--event-color) 18%, #ffffff);
+        box-shadow: 0 8px 18px rgba(30, 41, 59, 0.14);
+        transform: translateY(-1px);
+      }
+
+      .event-chip strong {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .event-chip small {
+        overflow: hidden;
+        color: #4b5563;
+        font-size: 11px;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .type-filter-list,
+      .type-editor-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .type-filter {
+        display: grid;
+        grid-template-columns: 18px 1fr auto;
+        align-items: center;
+        gap: 9px;
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.72);
+        padding: 9px;
+        text-align: left;
+        transition: opacity 140ms ease, transform 140ms ease, border-color 140ms ease, background 140ms ease;
+      }
+
+      .type-filter:hover {
+        background: #ffffff;
+        border-color: color-mix(in srgb, var(--type-color) 42%, var(--line));
+        transform: translateX(2px);
+      }
+
+      .type-filter.is-muted {
+        opacity: 0.42;
+      }
+
+      .swatch {
+        width: 14px;
+        height: 14px;
+        border: 1px solid rgba(0, 0, 0, 0.12);
+        border-radius: 50%;
+        background: var(--type-color);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--type-color) 15%, transparent);
+      }
+
+      .type-filter strong,
+      .type-editor-row input[type="text"] {
+        min-width: 0;
+      }
+
+      .type-count {
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      .type-editor-row {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 8px;
+        align-items: center;
+      }
+
+      .type-editor-row input[type="color"] {
+        min-height: 40px;
+        padding: 3px;
+      }
+
+      .event-form {
+        display: grid;
+        gap: 12px;
+      }
+
+      .form-actions {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 8px;
+      }
+
+      .copy-box {
+        display: grid;
+        gap: 10px;
+        margin-top: 2px;
+        padding: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(244, 242, 237, 0.72);
+      }
+
+      .copy-box.is-disabled {
+        opacity: 0.62;
+      }
+
+      .empty-note {
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.45;
+        padding: 10px;
+        border: 1px dashed var(--line-strong);
+        border-radius: 8px;
+      }
+
+    </style>
+  </head>
+  <body>
+    <script id="calendar-data" type="application/json">{"range":{"start":"2026-05-25","end":"2026-07-05"},"types":[{"id":"work","name":"金山上班","color":"#2563eb"},{"id":"driving","name":"学车","color":"#f59e0b"},{"id":"fitness","name":"健身","color":"#16a34a"},{"id":"dinner","name":"年假","color":"#db2777"},{"id":"type-mpkli0qn-e8ssxf","name":"端午","color":"#7c3aed"},{"id":"type-mpkll5rp-mc2kxi","name":"健康美丽","color":"#40ed62"},{"id":"type-mpklomqq-qzxc0l","name":"旅游","color":"#40ede2"},{"id":"type-mpklovk0-3h4hmz","name":"字节上班","color":"#0a0000"}],"events":[{"id":"evt-mpkle71j-xr1nnm","date":"2026-05-25","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkleudi-tx7hbx","date":"2026-05-26","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-work-20260527","date":"2026-05-27","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpklgwwl-8cif12","date":"2026-05-27","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-driving-20260527","date":"2026-05-27","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpklf2lq-l707pk","date":"2026-05-28","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkm498d-1pg3d3","date":"2026-05-28","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpklezhi-eqnrz7","date":"2026-05-29","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkkmp26-w47x9f","date":"2026-05-29","time":"13:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpklj01z-7adsp6","date":"2026-05-29","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpklmlgs-eq7ixg","date":"2026-05-29","time":"19:00-21:00","title":"做脸","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpklls3u-l0dcrl","date":"2026-05-31","time":"09:00-14:00","title":"看牙","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpkm9emj-obvxw2","date":"2026-06-01","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkljzk2-56qw6c","date":"2026-06-01","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpklo01m-lpb9k7","date":"2026-06-01","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkmd90j-5xn7k3","date":"2026-06-01","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpkm9io9-r7tsts","date":"2026-06-02","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkm9mk3-ady7rr","date":"2026-06-03","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpklk7br-dwmp80","date":"2026-06-03","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpkm80xk-wpxkqs","date":"2026-06-03","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkm9reh-2kpn7j","date":"2026-06-04","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpklknqm-qb36q3","date":"2026-06-04","time":"12:00-17:00","title":"学车+报科二考试","typeId":"driving","location":"","notes":""},{"id":"evt-mpklo4xf-g8704n","date":"2026-06-04","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkmdt1o-o1w7fy","date":"2026-06-04","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpkm2b4w-y5ca69","date":"2026-06-05","time":"10:00-15:00","title":"看甲状腺","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpkm5reb-ymyug8","date":"2026-06-05","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpklkc26-3h5bek","date":"2026-06-06","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpklryj0-926shn","date":"2026-06-07","time":"12:00-17:00","title":"科目二考试","typeId":"driving","location":"","notes":""},{"id":"evt-mpklzsql-sinuyv","date":"2026-06-08","time":"09:00-14:00","title":"看牙","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpklxkdt-wwpweo","date":"2026-06-08","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkma6o7-qy5tav","date":"2026-06-09","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkme2yk-ytsyew","date":"2026-06-09","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpkma8qh-664tee","date":"2026-06-10","time":"09:00-18:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpkme4hb-k3g78h","date":"2026-06-10","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpklznwy-wszitx","date":"2026-06-11","time":"09:00-14:00","title":"看中医","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpkm5uh2-2yam6c","date":"2026-06-11","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkm3gq3-9o46o5","date":"2026-06-11","time":"17:00-20:00","title":"烫头","typeId":"type-mpkll5rp-mc2kxi","location":"","notes":""},{"id":"evt-mpkmahly-qb5hqq","date":"2026-06-12","time":"09:00-12:00","title":"上班","typeId":"work","location":"","notes":""},{"id":"evt-mpklo2iv-32f2fn","date":"2026-06-12","time":"13:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkmeevl-nve27h","date":"2026-06-12","time":"待定","title":"健身","typeId":"fitness","location":"","notes":""},{"id":"evt-mpkm6qsf-c8ywz1","date":"2026-06-15","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpkm6t73-6w8l3d","date":"2026-06-16","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpklps34-hncog2","date":"2026-06-17","time":"09:00-20:00","title":"马尔代夫","typeId":"type-mpklomqq-qzxc0l","location":"","notes":""},{"id":"evt-mpkm6v98-9kr9t0","date":"2026-06-17","time":"10:00-18:00","title":"年假","typeId":"dinner","location":"","notes":""},{"id":"evt-mpklpyu9-1h075m","date":"2026-06-18","time":"09:00-20:00","title":"马尔代夫","typeId":"type-mpklomqq-qzxc0l","location":"","notes":""},{"id":"evt-mpklhlmq-ua5z3b","date":"2026-06-19","time":"09:00-18:00","title":"端午节","typeId":"type-mpkli0qn-e8ssxf","location":"","notes":""},{"id":"evt-mpklq0kd-d3d4ti","date":"2026-06-19","time":"09:00-20:00","title":"马尔代夫","typeId":"type-mpklomqq-qzxc0l","location":"","notes":""},{"id":"evt-mpklj3dg-pckag2","date":"2026-06-20","time":"09:00-18:00","title":"端午节","typeId":"type-mpkli0qn-e8ssxf","location":"","notes":""},{"id":"evt-mpklq28y-9l0tai","date":"2026-06-20","time":"09:00-20:00","title":"马尔代夫","typeId":"type-mpklomqq-qzxc0l","location":"","notes":""},{"id":"evt-mpklj58f-tx21do","date":"2026-06-21","time":"09:00-18:00","title":"端午节","typeId":"type-mpkli0qn-e8ssxf","location":"","notes":""},{"id":"evt-mpklq3lw-18gbco","date":"2026-06-21","time":"09:00-20:00","title":"马尔代夫","typeId":"type-mpklomqq-qzxc0l","location":"","notes":""},{"id":"evt-mpkltcev-8mllxf","date":"2026-06-23","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpkltffu-qdx2n4","date":"2026-06-24","time":"12:00-17:00","title":"学车+报科三考试","typeId":"driving","location":"","notes":""},{"id":"evt-mpkltitp-bxpg57","date":"2026-06-27","time":"12:00-17:00","title":"学车","typeId":"driving","location":"","notes":""},{"id":"evt-mpklsr9j-wvl8uj","date":"2026-06-28","time":"12:00-17:00","title":"科目三考试","typeId":"driving","location":"","notes":""},{"id":"evt-mpklukwe-e6q6fe","date":"2026-06-29","time":"10:00-22:00","title":"字节入职","typeId":"type-mpklovk0-3h4hmz","location":"","notes":""}]}</script>
+    <main class="app-shell">
+      <aside class="sidebar">
+        <div class="brand-block">
+          <p class="eyebrow">Offline Calendar</p>
+          <h1>月历</h1>
+          <p class="muted">按自定义日期范围展示整周日程。</p>
+        </div>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>类型筛选</h2>
+            <button class="ghost-button" id="showAllTypes" type="button">全选</button>
+          </div>
+          <div class="type-filter-list" id="typeFilters"><button type="button" class="type-filter" style="--type-color: #2563eb;">
+            <span class="swatch"></span>
+            <strong>金山上班</strong>
+            <span class="type-count">12</span>
+          </button><button type="button" class="type-filter" style="--type-color: #f59e0b;">
+            <span class="swatch"></span>
+            <strong>学车</strong>
+            <span class="type-count">11</span>
+          </button><button type="button" class="type-filter" style="--type-color: #16a34a;">
+            <span class="swatch"></span>
+            <strong>健身</strong>
+            <span class="type-count">6</span>
+          </button><button type="button" class="type-filter" style="--type-color: #db2777;">
+            <span class="swatch"></span>
+            <strong>年假</strong>
+            <span class="type-count">12</span>
+          </button><button type="button" class="type-filter" style="--type-color: #7c3aed;">
+            <span class="swatch"></span>
+            <strong>端午</strong>
+            <span class="type-count">3</span>
+          </button><button type="button" class="type-filter" style="--type-color: #40ed62;">
+            <span class="swatch"></span>
+            <strong>健康美丽</strong>
+            <span class="type-count">6</span>
+          </button><button type="button" class="type-filter" style="--type-color: #40ede2;">
+            <span class="swatch"></span>
+            <strong>旅游</strong>
+            <span class="type-count">5</span>
+          </button><button type="button" class="type-filter" style="--type-color: #0a0000;">
+            <span class="swatch"></span>
+            <strong>字节上班</strong>
+            <span class="type-count">1</span>
+          </button></div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>类型编辑</h2>
+          </div>
+          <div class="type-editor-list" id="typeEditors"><div class="type-editor-row">
+            <input type="color" value="#2563eb" aria-label="金山上班 颜色">
+            <input type="text" value="金山上班" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#f59e0b" aria-label="学车 颜色">
+            <input type="text" value="学车" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#16a34a" aria-label="健身 颜色">
+            <input type="text" value="健身" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#db2777" aria-label="年假 颜色">
+            <input type="text" value="年假" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#7c3aed" aria-label="端午 颜色">
+            <input type="text" value="端午" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#40ed62" aria-label="健康美丽 颜色">
+            <input type="text" value="健康美丽" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#40ede2" aria-label="旅游 颜色">
+            <input type="text" value="旅游" aria-label="类型名称">
+          </div><div class="type-editor-row">
+            <input type="color" value="#0a0000" aria-label="字节上班 颜色">
+            <input type="text" value="字节上班" aria-label="类型名称">
+          </div></div>
+          <button class="secondary-button full-width" id="addType" type="button">新增类型</button>
+        </section>
+      </aside>
+
+      <section class="workspace">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Date Span</p>
+            <h2 id="rangeTitle">2026-05-25 至 2026-07-05</h2>
+          </div>
+          <div class="date-controls" aria-label="选择展示日期范围">
+            <label>
+              起始
+              <input id="rangeStart" type="date">
+            </label>
+            <label>
+              结束
+              <input id="rangeEnd" type="date">
+            </label>
+            <button class="primary-button" id="applyRange" type="button">更新</button>
+            <button class="secondary-button" id="exportHtml" type="button">导出新版 HTML</button>
+          </div>
+        </header>
+
+        <section class="summary-strip" aria-label="当前日历统计">
+          <div>
+            <span id="visibleDayCount">42</span>
+            <small>展示天数</small>
+          </div>
+          <div>
+            <span id="eventCount">56</span>
+            <small>日程数量</small>
+          </div>
+          <div>
+            <span id="activeTypeCount">8</span>
+            <small>显示类型</small>
+          </div>
+        </section>
+
+        <section class="calendar-area" aria-label="月历日期表">
+          <div class="weekday-row">
+            <span>周一</span>
+            <span>周二</span>
+            <span>周三</span>
+            <span>周四</span>
+            <span>周五</span>
+            <span>周六</span>
+            <span>周日</span>
+          </div>
+          <div class="calendar-grid" id="calendarGrid"><button type="button" class="day-cell today" data-date="2026-05-25" aria-label="2026-05-25 日程"><div class="day-head"><span class="day-number">25</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-05-26" aria-label="2026-05-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-05-27" aria-label="2026-05-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-05-28" aria-label="2026-05-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-05-29" aria-label="2026-05-29 日程"><div class="day-head"><span class="day-number">29</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>13:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>做脸</strong>
+          <small>19:00-21:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-05-30" aria-label="2026-05-30 日程"><div class="day-head"><span class="day-number">30</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-05-31" aria-label="2026-05-31 日程"><div class="day-head"><span class="day-number">31</span><span class="month-tag">5月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看牙</strong>
+          <small>09:00-14:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-01" aria-label="2026-06-01 日程"><div class="day-head"><span class="day-number">1</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-02" aria-label="2026-06-02 日程"><div class="day-head"><span class="day-number">2</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-03" aria-label="2026-06-03 日程"><div class="day-head"><span class="day-number">3</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-04" aria-label="2026-06-04 日程"><div class="day-head"><span class="day-number">4</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车+报科二考试</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-05" aria-label="2026-06-05 日程"><div class="day-head"><span class="day-number">5</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看甲状腺</strong>
+          <small>10:00-15:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-06" aria-label="2026-06-06 日程"><div class="day-head"><span class="day-number">6</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-07" aria-label="2026-06-07 日程"><div class="day-head"><span class="day-number">7</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>科目二考试</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-08" aria-label="2026-06-08 日程"><div class="day-head"><span class="day-number">8</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看牙</strong>
+          <small>09:00-14:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-09" aria-label="2026-06-09 日程"><div class="day-head"><span class="day-number">9</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-10" aria-label="2026-06-10 日程"><div class="day-head"><span class="day-number">10</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-11" aria-label="2026-06-11 日程"><div class="day-head"><span class="day-number">11</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看中医</strong>
+          <small>09:00-14:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>烫头</strong>
+          <small>17:00-20:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-12" aria-label="2026-06-12 日程"><div class="day-head"><span class="day-number">12</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-13" aria-label="2026-06-13 日程"><div class="day-head"><span class="day-number">13</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-14" aria-label="2026-06-14 日程"><div class="day-head"><span class="day-number">14</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-15" aria-label="2026-06-15 日程"><div class="day-head"><span class="day-number">15</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-16" aria-label="2026-06-16 日程"><div class="day-head"><span class="day-number">16</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-17" aria-label="2026-06-17 日程"><div class="day-head"><span class="day-number">17</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-18" aria-label="2026-06-18 日程"><div class="day-head"><span class="day-number">18</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-19" aria-label="2026-06-19 日程"><div class="day-head"><span class="day-number">19</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-20" aria-label="2026-06-20 日程"><div class="day-head"><span class="day-number">20</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-21" aria-label="2026-06-21 日程"><div class="day-head"><span class="day-number">21</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-22" aria-label="2026-06-22 日程"><div class="day-head"><span class="day-number">22</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-23" aria-label="2026-06-23 日程"><div class="day-head"><span class="day-number">23</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-24" aria-label="2026-06-24 日程"><div class="day-head"><span class="day-number">24</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车+报科三考试</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-25" aria-label="2026-06-25 日程"><div class="day-head"><span class="day-number">25</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-26" aria-label="2026-06-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-27" aria-label="2026-06-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-28" aria-label="2026-06-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>科目三考试</strong>
+          <small>12:00-17:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-29" aria-label="2026-06-29 日程"><div class="day-head"><span class="day-number">29</span><span class="month-tag">6月</span></div><div class="event-list"><button type="button" class="event-chip" style="--event-color: #0a0000;">
+          <strong>字节入职</strong>
+          <small>10:00-22:00</small>
+        </button></div></button><button type="button" class="day-cell" data-date="2026-06-30" aria-label="2026-06-30 日程"><div class="day-head"><span class="day-number">30</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-01" aria-label="2026-07-01 日程"><div class="day-head"><span class="day-number">1</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-02" aria-label="2026-07-02 日程"><div class="day-head"><span class="day-number">2</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-03" aria-label="2026-07-03 日程"><div class="day-head"><span class="day-number">3</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-04" aria-label="2026-07-04 日程"><div class="day-head"><span class="day-number">4</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-05" aria-label="2026-07-05 日程"><div class="day-head"><span class="day-number">5</span><span class="month-tag">7月</span></div><div class="event-list"></div></button></div><button type="button" class="day-cell" data-date="2026-05-26" aria-label="2026-05-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-05-27" aria-label="2026-05-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-05-28" aria-label="2026-05-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-05-29" aria-label="2026-05-29 日程"><div class="day-head"><span class="day-number">29</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>13:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>做脸</strong>
+          <small>19:00-21:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-05-30" aria-label="2026-05-30 日程"><div class="day-head"><span class="day-number">30</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-05-31" aria-label="2026-05-31 日程"><div class="day-head"><span class="day-number">31</span><span class="month-tag">5月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看牙</strong>
+          <small>09:00-14:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-01" aria-label="2026-06-01 日程"><div class="day-head"><span class="day-number">1</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-02" aria-label="2026-06-02 日程"><div class="day-head"><span class="day-number">2</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-03" aria-label="2026-06-03 日程"><div class="day-head"><span class="day-number">3</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-04" aria-label="2026-06-04 日程"><div class="day-head"><span class="day-number">4</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车+报科二考试</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-05" aria-label="2026-06-05 日程"><div class="day-head"><span class="day-number">5</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看甲状腺</strong>
+          <small>10:00-15:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-06" aria-label="2026-06-06 日程"><div class="day-head"><span class="day-number">6</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-07" aria-label="2026-06-07 日程"><div class="day-head"><span class="day-number">7</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>科目二考试</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-08" aria-label="2026-06-08 日程"><div class="day-head"><span class="day-number">8</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看牙</strong>
+          <small>09:00-14:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-09" aria-label="2026-06-09 日程"><div class="day-head"><span class="day-number">9</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-10" aria-label="2026-06-10 日程"><div class="day-head"><span class="day-number">10</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-11" aria-label="2026-06-11 日程"><div class="day-head"><span class="day-number">11</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>看中医</strong>
+          <small>09:00-14:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ed62;">
+          <strong>烫头</strong>
+          <small>17:00-20:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-12" aria-label="2026-06-12 日程"><div class="day-head"><span class="day-number">12</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #2563eb;">
+          <strong>上班</strong>
+          <small>09:00-12:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>13:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #16a34a;">
+          <strong>健身</strong>
+          <small>待定</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-13" aria-label="2026-06-13 日程"><div class="day-head"><span class="day-number">13</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-14" aria-label="2026-06-14 日程"><div class="day-head"><span class="day-number">14</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-15" aria-label="2026-06-15 日程"><div class="day-head"><span class="day-number">15</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-16" aria-label="2026-06-16 日程"><div class="day-head"><span class="day-number">16</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-17" aria-label="2026-06-17 日程"><div class="day-head"><span class="day-number">17</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #db2777;">
+          <strong>年假</strong>
+          <small>10:00-18:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-18" aria-label="2026-06-18 日程"><div class="day-head"><span class="day-number">18</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-19" aria-label="2026-06-19 日程"><div class="day-head"><span class="day-number">19</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-20" aria-label="2026-06-20 日程"><div class="day-head"><span class="day-number">20</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-21" aria-label="2026-06-21 日程"><div class="day-head"><span class="day-number">21</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #7c3aed;">
+          <strong>端午节</strong>
+          <small>09:00-18:00</small>
+        </button><button type="button" class="event-chip" style="--event-color: #40ede2;">
+          <strong>马尔代夫</strong>
+          <small>09:00-20:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-22" aria-label="2026-06-22 日程"><div class="day-head"><span class="day-number">22</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-23" aria-label="2026-06-23 日程"><div class="day-head"><span class="day-number">23</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-24" aria-label="2026-06-24 日程"><div class="day-head"><span class="day-number">24</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车+报科三考试</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-25" aria-label="2026-06-25 日程"><div class="day-head"><span class="day-number">25</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-26" aria-label="2026-06-26 日程"><div class="day-head"><span class="day-number">26</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-06-27" aria-label="2026-06-27 日程"><div class="day-head"><span class="day-number">27</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>学车</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-28" aria-label="2026-06-28 日程"><div class="day-head"><span class="day-number">28</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #f59e0b;">
+          <strong>科目三考试</strong>
+          <small>12:00-17:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-29" aria-label="2026-06-29 日程"><div class="day-head"><span class="day-number">29</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="event-chip" style="--event-color: #0a0000;">
+          <strong>字节入职</strong>
+          <small>10:00-22:00</small>
+        </button><button type="button" class="day-cell" data-date="2026-06-30" aria-label="2026-06-30 日程"><div class="day-head"><span class="day-number">30</span><span class="month-tag">6月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-01" aria-label="2026-07-01 日程"><div class="day-head"><span class="day-number">1</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-02" aria-label="2026-07-02 日程"><div class="day-head"><span class="day-number">2</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-03" aria-label="2026-07-03 日程"><div class="day-head"><span class="day-number">3</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-04" aria-label="2026-07-04 日程"><div class="day-head"><span class="day-number">4</span><span class="month-tag">7月</span></div><div class="event-list"></div></button><button type="button" class="day-cell" data-date="2026-07-05" aria-label="2026-07-05 日程"><div class="day-head"><span class="day-number">5</span><span class="month-tag">7月</span></div><div class="event-list"></div></button>
+        </section>
+      </section>
+
+      <aside class="editor-panel">
+        <div class="panel-heading">
+          <h2 id="eventFormTitle">新增日程</h2>
+          <button class="ghost-button" id="resetEventForm" type="button">清空</button>
+        </div>
+        <form id="eventForm" class="event-form">
+          <input id="eventId" type="hidden" value="">
+          <label>
+            日期
+            <input id="eventDate" type="date" required="">
+          </label>
+          <label>
+            时间
+            <input id="eventTime" type="text" placeholder="例如 13-17 或 13:30-17:30">
+          </label>
+          <label>
+            标题
+            <input id="eventTitle" type="text" placeholder="例如 上班" required="">
+          </label>
+          <label>
+            类型
+            <select id="eventType" required=""><option value="work">金山上班</option><option value="driving">学车</option><option value="fitness">健身</option><option value="dinner">年假</option><option value="type-mpkli0qn-e8ssxf">端午</option><option value="type-mpkll5rp-mc2kxi">健康美丽</option><option value="type-mpklomqq-qzxc0l">旅游</option><option value="type-mpklovk0-3h4hmz">字节上班</option></select>
+          </label>
+          <label>
+            地点
+            <input id="eventLocation" type="text" placeholder="可选">
+          </label>
+          <label>
+            备注
+            <textarea id="eventNotes" rows="4" placeholder="可选"></textarea>
+          </label>
+          <div class="form-actions">
+            <button class="primary-button" type="submit">保存日程</button>
+            <button class="danger-button" id="deleteEvent" type="button" disabled="">删除</button>
+          </div>
+          <div class="copy-box is-disabled" id="copyBox">
+            <label>
+              复制到日期
+              <input id="copyDate" type="date">
+            </label>
+            <button class="secondary-button full-width" id="copyEvent" type="button" disabled="">复制当前日程</button>
+          </div>
+        </form>
+      </aside>
+    </main>
+    <script>
+      const DAY_MS = 24 * 60 * 60 * 1000;
+
+      function parseISODate(iso) {
+        const [year, month, day] = iso.split("-").map(Number);
+        return new Date(Date.UTC(year, month - 1, day));
+      }
+
+      function formatISODate(date) {
+        const year = date.getUTCFullYear();
+        const month = String(date.getUTCMonth() + 1).padStart(2, "0");
+        const day = String(date.getUTCDate()).padStart(2, "0");
+        return `${year}-${month}-${day}`;
+      }
+
+      function addDays(date, amount) {
+        return new Date(date.getTime() + amount * DAY_MS);
+      }
+
+      function startOfWeekMonday(date) {
+        const weekday = date.getUTCDay();
+        const daysFromMonday = (weekday + 6) % 7;
+        return addDays(date, -daysFromMonday);
+      }
+
+      function endOfWeekSunday(date) {
+        const weekday = date.getUTCDay();
+        const daysToSunday = (7 - weekday) % 7;
+        return addDays(date, daysToSunday);
+      }
+
+      function normalizeClockPart(value) {
+        const match = String(value).trim().match(/^(\d{1,2})(?::(\d{1,2}))?$/);
+        if (!match) return null;
+
+        const hour = Number(match[1]);
+        const minute = match[2] === undefined ? 0 : Number(match[2]);
+        if (hour > 23 || minute > 59) return null;
+
+        return `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+      }
+
+      function buildCalendarDays(startISO, endISO) {
+        const start = parseISODate(startISO);
+        const end = parseISODate(endISO);
+
+        if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+          throw new Error("Invalid date range");
+        }
+
+        const selectedStart = start <= end ? start : end;
+        const selectedEnd = start <= end ? end : start;
+        const visibleStart = startOfWeekMonday(selectedStart);
+        const visibleEnd = endOfWeekSunday(selectedEnd);
+        const days = [];
+
+        for (let cursor = visibleStart; cursor <= visibleEnd; cursor = addDays(cursor, 1)) {
+          days.push({
+            iso: formatISODate(cursor),
+            day: cursor.getUTCDate(),
+            month: cursor.getUTCMonth() + 1,
+            weekday: cursor.getUTCDay(),
+            inRange: cursor >= selectedStart && cursor <= selectedEnd,
+            isToday: formatISODate(cursor) === formatISODate(new Date())
+          });
+        }
+
+        return days;
+      }
+
+      function createDefaultCalendarData() {
+        return {
+          range: {
+            start: "2026-05-25",
+            end: "2026-07-05"
+          },
+          types: [
+            { id: "work", name: "上班", color: "#2563eb" },
+            { id: "driving", name: "学车", color: "#f59e0b" },
+            { id: "fitness", name: "健身", color: "#16a34a" },
+            { id: "dinner", name: "聚餐", color: "#db2777" }
+          ],
+          events: [
+            {
+              id: "evt-work-20260527",
+              date: "2026-05-27",
+              time: "09:00-12:00",
+              title: "上班",
+              typeId: "work",
+              location: "",
+              notes: ""
+            },
+            {
+              id: "evt-driving-20260527",
+              date: "2026-05-27",
+              time: "13:00-17:00",
+              title: "学车",
+              typeId: "driving",
+              location: "",
+              notes: ""
+            },
+            {
+              id: "evt-fitness-20260527",
+              date: "2026-05-27",
+              time: "18:00-19:00",
+              title: "健身",
+              typeId: "fitness",
+              location: "",
+              notes: ""
+            },
+            {
+              id: "evt-dinner-20260527",
+              date: "2026-05-27",
+              time: "19:30",
+              title: "和YY聚餐",
+              typeId: "dinner",
+              location: "XX位置",
+              notes: ""
+            }
+          ]
+        };
+      }
+
+      function getEventsForDate(events, isoDate) {
+        return events.filter((event) => event.date === isoDate);
+      }
+
+      function filterEventsByType(events, visibleTypeIds) {
+        return events.filter((event) => visibleTypeIds.has(event.typeId));
+      }
+
+      function normalizeTimeText(value) {
+        const input = String(value ?? "").trim();
+        if (!input) return "";
+
+        const compact = input
+          .replaceAll("：", ":")
+          .replace(/\s*(?:-|~|—|–|到|至)\s*/g, "-");
+
+        if (compact.includes("-")) {
+          const [start, end] = compact.split("-");
+          const normalizedStart = normalizeClockPart(start);
+          const normalizedEnd = normalizeClockPart(end);
+          return normalizedStart && normalizedEnd ? `${normalizedStart}-${normalizedEnd}` : input;
+        }
+
+        return normalizeClockPart(compact) ?? input;
+      }
+
+      function copyEventToDate(event, targetDate, idFactory = () => createId("evt")) {
+        return {
+          ...event,
+          id: idFactory(),
+          date: targetDate
+        };
+      }
+
+      function serializeDataForEmbedding(data) {
+        return JSON.stringify(data).replaceAll("<", "\\u003c").replaceAll(">", "\\u003e");
+      }
+
+      function createId(prefix = "item") {
+        return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+      }
+
+      function createStorageAdapter(storage) {
+        return {
+          get(key) {
+            try {
+              return storage?.getItem ? storage.getItem(key) : null;
+            } catch {
+              return null;
+            }
+          },
+          set(key, value) {
+            try {
+              if (!storage?.setItem) return;
+              const payload = typeof value === "string" ? value : JSON.stringify(value);
+              storage.setItem(key, payload);
+            } catch {
+              // Some browser contexts disable localStorage. Export still provides durable saving.
+            }
+          }
+        };
+      }
+
+    </script>
+    <script>
+      const STORAGE_KEY = "offline-calendar-data-v1";
+      const storage = createStorageAdapter(globalThis.localStorage);
+
+      const elements = {
+        rangeTitle: document.querySelector("#rangeTitle"),
+        rangeStart: document.querySelector("#rangeStart"),
+        rangeEnd: document.querySelector("#rangeEnd"),
+        applyRange: document.querySelector("#applyRange"),
+        exportHtml: document.querySelector("#exportHtml"),
+        visibleDayCount: document.querySelector("#visibleDayCount"),
+        eventCount: document.querySelector("#eventCount"),
+        activeTypeCount: document.querySelector("#activeTypeCount"),
+        calendarGrid: document.querySelector("#calendarGrid"),
+        typeFilters: document.querySelector("#typeFilters"),
+        typeEditors: document.querySelector("#typeEditors"),
+        showAllTypes: document.querySelector("#showAllTypes"),
+        addType: document.querySelector("#addType"),
+        eventForm: document.querySelector("#eventForm"),
+        eventFormTitle: document.querySelector("#eventFormTitle"),
+        eventId: document.querySelector("#eventId"),
+        eventDate: document.querySelector("#eventDate"),
+        eventTime: document.querySelector("#eventTime"),
+        eventTitle: document.querySelector("#eventTitle"),
+        eventType: document.querySelector("#eventType"),
+        eventLocation: document.querySelector("#eventLocation"),
+        eventNotes: document.querySelector("#eventNotes"),
+        resetEventForm: document.querySelector("#resetEventForm"),
+        deleteEvent: document.querySelector("#deleteEvent"),
+        copyBox: document.querySelector("#copyBox"),
+        copyDate: document.querySelector("#copyDate"),
+        copyEvent: document.querySelector("#copyEvent")
+      };
+
+      let state = loadInitialData();
+      let visibleTypeIds = new Set(state.types.map((type) => type.id));
+
+      function readEmbeddedData() {
+        const raw = document.querySelector("#calendar-data")?.textContent?.trim();
+        if (!raw) return createDefaultCalendarData();
+        return JSON.parse(raw);
+      }
+
+      function loadInitialData() {
+        try {
+          const stored = storage.get(STORAGE_KEY);
+          return stored ? normalizeData(JSON.parse(stored)) : normalizeData(readEmbeddedData());
+        } catch (error) {
+          console.warn("Failed to load saved calendar data.", error);
+          return normalizeData(createDefaultCalendarData());
+        }
+      }
+
+      function normalizeData(data) {
+        const fallback = createDefaultCalendarData();
+        return {
+          range: data.range ?? fallback.range,
+          types: Array.isArray(data.types) && data.types.length ? data.types : fallback.types,
+          events: Array.isArray(data.events) ? data.events : fallback.events
+        };
+      }
+
+      function persist() {
+        storage.set(STORAGE_KEY, state);
+      }
+
+      function typeById(typeId) {
+        return state.types.find((type) => type.id === typeId) ?? {
+          id: "unknown",
+          name: "未分类",
+          color: "#64748b"
+        };
+      }
+
+      function formatRangeTitle() {
+        return `${state.range.start} 至 ${state.range.end}`;
+      }
+
+      function eventCountByType(typeId) {
+        return state.events.filter((event) => event.typeId === typeId).length;
+      }
+
+      function sortEvents() {
+        state.events.sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`));
+      }
+
+      function render() {
+        const days = buildCalendarDays(state.range.start, state.range.end);
+        const filteredEvents = filterEventsByType(state.events, visibleTypeIds);
+
+        elements.rangeTitle.textContent = formatRangeTitle();
+        elements.rangeStart.value = state.range.start;
+        elements.rangeEnd.value = state.range.end;
+        elements.visibleDayCount.textContent = String(days.length);
+        elements.eventCount.textContent = String(filteredEvents.length);
+        elements.activeTypeCount.textContent = String(visibleTypeIds.size);
+
+        renderTypeFilters();
+        renderTypeEditors();
+        renderEventTypeOptions();
+        renderCalendar(days, filteredEvents);
+        updateEventActions();
+      }
+
+      function renderCalendar(days, filteredEvents) {
+        elements.calendarGrid.innerHTML = "";
+        const fragment = document.createDocumentFragment();
+
+        days.forEach((day) => {
+          const cell = document.createElement("button");
+          cell.type = "button";
+          cell.className = "day-cell";
+          if (!day.inRange) cell.classList.add("outside-range");
+          if (day.isToday) cell.classList.add("today");
+          cell.dataset.date = day.iso;
+          cell.setAttribute("aria-label", `${day.iso} 日程`);
+
+          const head = document.createElement("div");
+          head.className = "day-head";
+          head.innerHTML = `<span class="day-number">${day.day}</span><span class="month-tag">${day.month}月</span>`;
+          cell.append(head);
+
+          const eventList = document.createElement("div");
+          eventList.className = "event-list";
+          getEventsForDate(filteredEvents, day.iso).forEach((event) => {
+            eventList.append(createEventChip(event));
+          });
+          cell.append(eventList);
+
+          cell.addEventListener("click", () => {
+            resetEventForm(day.iso);
+          });
+
+          fragment.append(cell);
+        });
+
+        elements.calendarGrid.append(fragment);
+      }
+
+      function createEventChip(event) {
+        const type = typeById(event.typeId);
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "event-chip";
+        chip.style.setProperty("--event-color", type.color);
+        chip.innerHTML = `
+          <strong>${escapeHtml(event.title)}</strong>
+          <small>${escapeHtml([event.time, event.location].filter(Boolean).join(" · "))}</small>
+        `;
+        chip.addEventListener("click", (eventObject) => {
+          eventObject.stopPropagation();
+          editEvent(event.id);
+        });
+        return chip;
+      }
+
+      function renderTypeFilters() {
+        elements.typeFilters.innerHTML = "";
+        state.types.forEach((type) => {
+          const button = document.createElement("button");
+          button.type = "button";
+          button.className = "type-filter";
+          if (!visibleTypeIds.has(type.id)) button.classList.add("is-muted");
+          button.style.setProperty("--type-color", type.color);
+          button.innerHTML = `
+            <span class="swatch"></span>
+            <strong>${escapeHtml(type.name)}</strong>
+            <span class="type-count">${eventCountByType(type.id)}</span>
+          `;
+          button.addEventListener("click", () => {
+            if (visibleTypeIds.has(type.id)) {
+              visibleTypeIds.delete(type.id);
+            } else {
+              visibleTypeIds.add(type.id);
+            }
+            render();
+          });
+          elements.typeFilters.append(button);
+        });
+      }
+
+      function renderTypeEditors() {
+        elements.typeEditors.innerHTML = "";
+        state.types.forEach((type) => {
+          const row = document.createElement("div");
+          row.className = "type-editor-row";
+          row.innerHTML = `
+            <input type="color" value="${type.color}" aria-label="${escapeHtml(type.name)} 颜色">
+            <input type="text" value="${escapeHtml(type.name)}" aria-label="类型名称">
+          `;
+          const colorInput = row.querySelector("input[type='color']");
+          const nameInput = row.querySelector("input[type='text']");
+
+          colorInput.addEventListener("input", () => {
+            type.color = colorInput.value;
+            persist();
+            render();
+          });
+          nameInput.addEventListener("change", () => {
+            type.name = nameInput.value.trim() || "未命名";
+            persist();
+            render();
+          });
+          elements.typeEditors.append(row);
+        });
+      }
+
+      function renderEventTypeOptions() {
+        const currentValue = elements.eventType.value;
+        elements.eventType.innerHTML = "";
+        state.types.forEach((type) => {
+          const option = document.createElement("option");
+          option.value = type.id;
+          option.textContent = type.name;
+          elements.eventType.append(option);
+        });
+        if (state.types.some((type) => type.id === currentValue)) {
+          elements.eventType.value = currentValue;
+        }
+      }
+
+      function updateEventActions() {
+        const hasSelectedEvent = Boolean(elements.eventId.value);
+        elements.deleteEvent.disabled = !hasSelectedEvent;
+        elements.copyEvent.disabled = !hasSelectedEvent || !elements.copyDate.value;
+        elements.copyBox.classList.toggle("is-disabled", !hasSelectedEvent);
+      }
+
+      function resetEventForm(date = state.range.start) {
+        elements.eventFormTitle.textContent = "新增日程";
+        elements.eventId.value = "";
+        elements.eventDate.value = date;
+        elements.eventTime.value = "";
+        elements.eventTitle.value = "";
+        elements.eventType.value = state.types[0]?.id ?? "";
+        elements.eventLocation.value = "";
+        elements.eventNotes.value = "";
+        elements.copyDate.value = date;
+        updateEventActions();
+      }
+
+      function editEvent(eventId) {
+        const event = state.events.find((item) => item.id === eventId);
+        if (!event) return;
+        elements.eventFormTitle.textContent = "编辑日程";
+        elements.eventId.value = event.id;
+        elements.eventDate.value = event.date;
+        elements.eventTime.value = event.time ?? "";
+        elements.eventTitle.value = event.title;
+        elements.eventType.value = event.typeId;
+        elements.eventLocation.value = event.location ?? "";
+        elements.eventNotes.value = event.notes ?? "";
+        elements.copyDate.value = event.date;
+        updateEventActions();
+      }
+
+      function collectEventFromForm(eventId) {
+        return {
+          id: eventId,
+          date: elements.eventDate.value,
+          time: normalizeTimeText(elements.eventTime.value),
+          title: elements.eventTitle.value.trim(),
+          typeId: elements.eventType.value,
+          location: elements.eventLocation.value.trim(),
+          notes: elements.eventNotes.value.trim()
+        };
+      }
+
+      function saveEvent(formEvent) {
+        formEvent.preventDefault();
+        const eventId = elements.eventId.value || createId("evt");
+        const nextEvent = collectEventFromForm(eventId);
+
+        if (!nextEvent.title || !nextEvent.date || !nextEvent.typeId) return;
+
+        const index = state.events.findIndex((event) => event.id === eventId);
+        if (index >= 0) {
+          state.events[index] = nextEvent;
+        } else {
+          state.events.push(nextEvent);
+        }
+
+        sortEvents();
+        persist();
+        resetEventForm(nextEvent.date);
+        render();
+      }
+
+      function deleteSelectedEvent() {
+        const eventId = elements.eventId.value;
+        if (!eventId) return;
+        state.events = state.events.filter((event) => event.id !== eventId);
+        persist();
+        resetEventForm(elements.eventDate.value || state.range.start);
+        render();
+      }
+
+      function copySelectedEvent() {
+        const eventId = elements.eventId.value;
+        const targetDate = elements.copyDate.value;
+        const sourceEvent = state.events.find((event) => event.id === eventId);
+        if (!sourceEvent || !targetDate) return;
+
+        const copied = copyEventToDate(
+          { ...sourceEvent, time: normalizeTimeText(sourceEvent.time) },
+          targetDate,
+          () => createId("evt")
+        );
+        state.events.push(copied);
+        sortEvents();
+        persist();
+        editEvent(copied.id);
+        render();
+      }
+
+      function addType() {
+        const type = {
+          id: createId("type"),
+          name: "新类型",
+          color: "#7c3aed"
+        };
+        state.types.push(type);
+        visibleTypeIds.add(type.id);
+        persist();
+        render();
+      }
+
+      function applyRange() {
+        if (!elements.rangeStart.value || !elements.rangeEnd.value) return;
+        state.range = {
+          start: elements.rangeStart.value,
+          end: elements.rangeEnd.value
+        };
+        persist();
+        resetEventForm(state.range.start);
+        render();
+      }
+
+      async function exportCurrentHtml() {
+        const html = document.documentElement.outerHTML.replace(
+          /<script id="calendar-data" type="application\/json">[\s\S]*?<\/script>/,
+          `<script id="calendar-data" type="application/json">${serializeDataForEmbedding(state)}<\/script>`
+        );
+        const blob = new Blob(["<!doctype html>\n", html], { type: "text/html;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `month-calendar-${state.range.start}-to-${state.range.end}.html`;
+        document.body.append(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      function escapeHtml(value) {
+        return String(value)
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
+      }
+
+      elements.applyRange.addEventListener("click", applyRange);
+      elements.exportHtml.addEventListener("click", exportCurrentHtml);
+      elements.eventForm.addEventListener("submit", saveEvent);
+      elements.eventTime.addEventListener("blur", () => {
+        elements.eventTime.value = normalizeTimeText(elements.eventTime.value);
+      });
+      elements.resetEventForm.addEventListener("click", () => resetEventForm());
+      elements.deleteEvent.addEventListener("click", deleteSelectedEvent);
+      elements.copyDate.addEventListener("change", updateEventActions);
+      elements.copyEvent.addEventListener("click", copySelectedEvent);
+      elements.addType.addEventListener("click", addType);
+      elements.showAllTypes.addEventListener("click", () => {
+        visibleTypeIds = new Set(state.types.map((type) => type.id));
+        render();
+      });
+
+      resetEventForm(state.range.start);
+      render();
+
+    </script>
+  
+
+</body></html>
