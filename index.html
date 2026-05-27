@@ -7,6 +7,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
+    <meta name="calendar-data-version" content="1779879000000">
     <script>
       (() => {
         if (location.protocol === "file:") return;
@@ -1414,6 +1415,7 @@
     </script>
     <script>
       const STORAGE_KEY = "offline-calendar-data-v1";
+      const VERSION_STORAGE_KEY = `${STORAGE_KEY}:html-version`;
       const storage = createStorageAdapter(globalThis.localStorage);
 
       const elements = {
@@ -1458,10 +1460,23 @@
         return JSON.parse(raw);
       }
 
+      function readEmbeddedVersion() {
+        return document.querySelector("meta[name='calendar-data-version']")?.content || "0";
+      }
+
       function loadInitialData() {
         try {
+          const embeddedVersion = readEmbeddedVersion();
+          const storedVersion = storage.get(VERSION_STORAGE_KEY);
+          const embeddedData = normalizeData(readEmbeddedData());
+          if (embeddedVersion && embeddedVersion !== storedVersion) {
+            storage.set(STORAGE_KEY, embeddedData);
+            storage.set(VERSION_STORAGE_KEY, embeddedVersion);
+            return embeddedData;
+          }
+
           const stored = storage.get(STORAGE_KEY);
-          return stored ? normalizeData(JSON.parse(stored)) : normalizeData(readEmbeddedData());
+          return stored ? normalizeData(JSON.parse(stored)) : embeddedData;
         } catch (error) {
           console.warn("Failed to load saved calendar data.", error);
           return normalizeData(createDefaultCalendarData());
@@ -1479,6 +1494,7 @@
 
       function persist() {
         storage.set(STORAGE_KEY, state);
+        storage.set(VERSION_STORAGE_KEY, readEmbeddedVersion());
       }
 
       function typeById(typeId) {
@@ -1848,10 +1864,20 @@
       }
 
       async function exportCurrentHtml() {
-        const html = document.documentElement.outerHTML.replace(
-          /<script id="calendar-data" type="application\/json">[\s\S]*?<\/script>/,
-          `<script id="calendar-data" type="application/json">${serializeDataForEmbedding(state)}<\/script>`
-        );
+        const version = String(Date.now());
+        const versionMeta = document.querySelector("meta[name='calendar-data-version']");
+        if (versionMeta) versionMeta.content = version;
+        storage.set(VERSION_STORAGE_KEY, version);
+
+        const html = document.documentElement.outerHTML
+          .replace(
+            /<meta name="calendar-data-version" content="[^"]*">/,
+            `<meta name="calendar-data-version" content="${version}">`
+          )
+          .replace(
+            /<script id="calendar-data" type="application\/json">[\s\S]*?<\/script>/,
+            `<script id="calendar-data" type="application/json">${serializeDataForEmbedding(state)}<\/script>`
+          );
         const blob = new Blob(["<!doctype html>\n", html], { type: "text/html;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
